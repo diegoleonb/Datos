@@ -1,0 +1,187 @@
+from sys import stdin
+
+class Node:
+    #Definicion estructural
+    def __init__(self, val):
+        self.clear()
+        self.setVal(val)
+
+    def getVal(self):
+        # Devuelve el elemento key del nodo
+        return self.val
+
+    def getPrev(self):
+        # Devuelve el elemento del previo en el nodo
+        return self.prev
+
+    def getNext(self):
+        # Devuelve el elemento del siguiente en el nodo
+        return self.next
+
+    def setVal(self, val):
+        # Asigna el elemento de key(val)
+        self.val = val
+
+    def setNext(self, next):
+        # Asigna el elemento del siguiente en el nodo
+        self.next = next
+    def setPrev(self, prev):
+        # Asigna el elemento del previo en el nodo
+        self.prev = prev
+
+    def clear(self):
+        # Convierte key(val), el previo y el siguiente en vacio
+        self.prev = None
+        self.next = None
+        self.val = None
+
+    def equal(self, node):
+        # Verifica que el nodo no sea vacio.
+        return node is not None and node.getVal() == self.val
+
+    def ReverseNodo(self):
+        # Cambia el orden del previo y el siguiente detro del Nodo
+        cNext = self.getNext()
+        cPrev = self.getPrev()
+        self.setNext(cPrev)
+        self.setPrev(cNext)
+
+
+class DoubleLinkedList:
+    # Definicion estructural
+    def __init__(self):
+        self.head = None
+        self.tail = None
+
+    def getHead(self):
+        # Devuelve la cabeza de la lista doblemente enlazada
+        return self.head
+
+    def getTail(self):
+        # Devuelve la cola de la lista doblemente enlazada
+        return self.tail
+
+    def sethead(self, head):
+        # Asigna la cabeza de la lista doblemente enlazada
+        self.head = head
+        if head is not None:
+            # Al ser cabeza el nodo previo de la lista será vacio
+            head.setPrev(None)
+
+    def setTail(self, tail):
+        # Asigna la cola de la lista doblemente enlazada
+        self.tail = tail
+        if tail is not None:
+            # AL ser la cola el nodo siguiente será vacio
+            tail.setNext(None)
+
+    def empty(self):
+        # Verifica si la lista doblemente enlazada es vacia
+        return self.head == self.tail and self.head is None
+
+    def insertVal(self, val, direction=True):
+        # Llama a la funcion indicada para insertar en la cabeza o en la cola de la lista
+        if direction:
+            # Si direction es True entonces llama a la funcion insertHead
+            self.insertHead(Node(val))
+        else:
+            # Si direction es False llama a la funcion insertTail
+            self.insertTail(Node(val))
+
+    def insertTail(self, node):
+        # Inserta el nodo en la cola de la lista doblemente enlazada
+        if self.empty():
+            # Si la lista es vacia entonces el nodo será cabeza y cola a la vez (solo hay uno)
+            self.tail, self.head = node, node
+        else:
+            # Inserta el nodo en la cola de la lista y hace los respectivos enlaces
+            cTail = self.getTail()
+            self.tail = node
+            node.setPrev(cTail)
+            cTail.setNext(node)
+
+    def insertHead(self, node):
+        # Inserta el nodo en la cabeza de la lista doblemente enlazada
+        if self.empty():
+            # Si la lista es vacia entonces el nodo será cabeza y cola a la vez (solo hay uno)
+            self.tail, self.head = node, node
+        else:
+            # Inserta el nodo en la cabeza y hace los respectivos enlaces
+            cHead = self.getHead()
+            self.head = node
+            node.setNext(cHead)
+            cHead.setPrev(node)
+
+    def searchNode(self, node):
+        # Busqueda de un Nodo especifico
+        temp, found = self.getHead(), False
+        while temp is not None and not found:
+            if temp.equal(node):
+                return temp
+            temp = temp.getNext()
+
+    def searchVal(self, val):
+        # Busqueda de un elemento especifico
+        return self.searchNode(Node(val))
+
+    def deleteNode(self, node):
+        # Elimina un nodo especifico desenlazandolo de la lista
+        cDelete = self.searchNode(node)
+        if cDelete is not None:
+            isHead, isTail = cDelete.getPrev() is None, cDelete.getNext() is None
+            # Node is Head
+            if isHead:
+                next = cDelete.getNext()
+                self.sethead(next)
+            # Node is Tail
+            if isTail:
+                prev = cDelete.getPrev()
+                self.setTail(prev)
+            if not isHead and not isTail:
+                prev, next = cDelete.getPrev(), cDelete.getNext()
+                prev.setNext(next)
+                next.setPrev(prev)
+                cDelete.clear()
+
+    def printList(self):
+        # Imprime la lista doblemente enlazada
+        curr = self.getHead()
+        while curr is not None:
+            print(curr.getVal())
+            curr = curr.getNext()
+
+    def MergeList(self,lista):
+        # Unifica una lista doblemente enlazada con otra lista
+        cTail, cHeadlist, cTaillist = self.getTail(), lista.getHead(), lista.getTail()
+        if cTail is not None and cHeadlist is not None and cTaillist is not None:
+            cTail.setNext(cHeadlist)
+            cHeadlist.setPrev(cTail)
+            self.setTail(cTaillist)
+
+
+    def Reverselist(self):
+        # Invierte el orden de la lista doblemente enlazada
+        temp = self.getHead()
+        while temp is not None:
+            temp.ReverseNodo()
+            temp = temp.getPrev()
+        cHead = self.getHead()
+        cTail = self.getTail()
+        self.sethead(cTail)
+        self.setTail(cHead)
+
+
+def main():
+    # Funcion principal
+    lst = DoubleLinkedList()
+    for i in range(10):
+        lst.insertVal(i, False)
+    lista = DoubleLinkedList()
+    for j in range(10,20):
+        lista.insertVal(j, False)
+    lst.MergeList(lista)
+    lst.printList()
+    lst.Reverselist()
+    lst.printList()
+
+main()
