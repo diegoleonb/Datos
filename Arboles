@@ -1,0 +1,156 @@
+import random
+
+class Node:
+    def __init__(self, value):
+        # Definicion estructural
+        self.value = value
+        self.left = None
+        self.right = None
+
+    # Definicion Comportamental
+    def getValue(self):
+        return self.value
+
+    def getLeft(self):
+        return self.left
+
+
+    def getRight(self):
+        return self.right
+
+
+    def setValue(self, value):
+        self.value = value
+
+
+    def setRight(self, right):
+        self.right = right
+
+
+
+    def setLeft(self, left):
+        self.left = left
+
+
+
+    def printNode(self, node):
+        return (str(node.getValue())) if node is not None else ('EMPTY')
+
+
+
+
+# Arbol BST (Binary search tree)
+class BST:
+    def __init__(self, root):
+        # Definicion estructural
+        self.root = root
+
+    def getRoot(self):
+        return self.root
+
+
+
+    def setRoot(self, root):
+        self.root = root
+
+
+    # Recorridos
+    def inorderWalk(self, node):
+        if node is not None:
+            self.inorderWalk(node.getLeft())
+            print(node.getValue())
+            self.inorderWalk(node.getRight())
+
+
+    def preorderWalk(self, node):
+        if node is not None:
+            print(node.getValue())
+            self.preorderWalk(node.getLeft())
+            self.preorderWalk(node.getRight())
+
+
+
+    def posOrderWalk(self, node):
+        if node is not None:
+            self.posOrderWalk(node.getLeft())
+            self.posOrderWalk(node.getRight())
+            print(node.getValue())
+
+
+
+    def searchNode(self, node, searchKey, cnt=0):
+        if node is None or searchKey == node.getValue():
+            return (node, cnt + 1)
+
+        return self.searchNode(node.getLeft() if searchKey < node.getValue() else node.getRight(), searchKey, cnt + 1)
+
+
+    def minimum(self):
+        node = self.getRoot()
+        while node.getLeft() is not None:
+            node = node.getLeft()
+        return node
+
+
+    def maximum(self):
+        node = self.getRoot()
+        while node.getRight() is not None:
+            node = node.getRight()
+        return node
+
+
+    def searchEmptySpot(self, key):
+        node = self.getRoot()
+        spot = None
+        while node is not None:
+            spot = node
+            node = node.getLeft() if key < node.getValue() else node.getRight()
+        return spot
+
+
+
+    def insert(self, node):
+        spot = self.searchEmptySpot(node.getValue())
+        if spot is None:
+            self.setRoot(node)
+        elif node.getValue() < spot.getValue():
+            spot.setLeft(node)
+        else:
+            spot.setRight(node)
+
+
+    def insertList(self, lst):
+        for e in lst:
+            self.insert(Node(e))
+
+MAX = 1E6
+MAX_SIZE = 100
+
+
+def main():
+    lst = [(random.randrange(0, MAX)) for i in range(MAX_SIZE)]
+    # [667, 868, 947, 905, 303, 390, 569, 860]
+    print(lst)
+    handler = Node(None)
+    bst = BST(None)
+    bst.insertList(lst)
+    print('============INORDEN============')
+    bst.inorderWalk(bst.getRoot())
+    print('============PREORDEN============')
+    bst.preorderWalk(bst.getRoot())
+    print('============POSORDEN============')
+    bst.posOrderWalk(bst.getRoot())
+    print('============MAX============')
+    mx = bst.maximum()
+    print(mx.getValue() if mx is not None else None)
+    print('============MIN============')
+    mn = bst.minimum()
+    print(mn.getValue() if mn is not None else None)
+
+    searchCandidate = lst[random.randrange(0, MAX_SIZE)]
+    searchResult = bst.searchNode(bst.getRoot(), searchCandidate)
+    print('============SEARCHING', searchCandidate, '============')
+    print(handler.printNode(searchResult[0]), searchResult[1])
+
+
+main()
