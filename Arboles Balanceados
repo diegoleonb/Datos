@@ -7,7 +7,7 @@ class Node:
         self.value = value
         self.left = None
         self.right = None
-        self.height = None
+        self.height = 0
 
     # Definicion Comportamental
     def getValue(self):
@@ -61,6 +61,7 @@ class Tree:
             self.inorderWalk(node.getLeft())
             print(node.getValue())
             self.inorderWalk(node.getRight())
+
     def preorderWalk(self, node):
         if node is not None:
             print(node.getValue())
@@ -76,6 +77,7 @@ class Tree:
     def searchNode(self, node, searchKey, cnt=0):
         if node is None or searchKey == node.getValue():
             return (node, cnt + 1)
+
         return self.searchNode(node.getLeft() if searchKey < node.getValue() else node.getRight(), searchKey, cnt + 1)
 
     def minimum(self):
@@ -91,11 +93,11 @@ class Tree:
         return node
 
     #Generic Insertion method
-    def insert(self, node , balanced = False):
-        if not balanced :
+    def insert(self, node):
+        if not self.balanced :
             self.insertBST(node)
         else:
-            self.insertAVL( self.getRoot(), node)
+            self.insertAVL(node)
 
     # BST Insertion functions
     def searchEmptySpot(self, key):
@@ -106,8 +108,11 @@ class Tree:
             node = node.getLeft() if key < node.getValue() else node.getRight()
         return spot
 
+
+
     def insertBST(self, node):
         spot = self.searchEmptySpot(node.getValue())
+
         if spot is None:
             self.setRoot(node)
         elif node.getValue() < spot.getValue():
@@ -118,42 +123,51 @@ class Tree:
 
     #AVL Insertion functions
     def getHeight(self, node):
-        if node:
-            return node.getHeight()
-        return 0
+        if node is None:
+            return 0
+        return node.getHeight()
 
     def setHeight(self, node):
-        if node:
-            node.setHeight(max(self.getHeight(node.getLeft(), node.getRight())) + 1)
+        if node is not None :
+            left, right = node.getLeft(), node.getRight()
+            node.setHeight(max(self.getHeight(left),  self.getHeight(right)) + 1)
 
-    def insertAVL(self, node, nodeIns):
+    def insertAVL(self, nodeIns):
+        self.setRoot(self._insertAVL(self.getRoot(), nodeIns))
+
+    def _insertAVL(self, node, nodeIns):
         if node is None:
             return nodeIns
         if node.getValue() > nodeIns.getValue():
-            node.setLeft( self.insertAVL(node.getLeft(), nodeIns) )
+            node.setLeft( self._insertAVL(node.getLeft(), nodeIns) )
         else:
-            node.setRight(self.insertAVL(node.getRight(), nodeIns))
+            node.setRight(self._insertAVL(node.getRight(), nodeIns))
         #Update node Height
         self.setHeight(node)
         diffBal = node.getBalance()
+
+        value = nodeIns.getValue()
+
         #Determinate left Rotate
-        if diffBal > 1 and nodeIns.getValue() < node.getLeft().getValue():
+        if diffBal > 1 and value < node.getLeft().getValue():
             return self.rotateRight(node)
 
         #Determinate right Rotate
-        if diffBal < -1 and nodeIns.getValue() > node.getLeft().getValue():
+        if diffBal < -1 and value > node.getRight().getValue():
             return self.rotateLeft(node)
 
         #Determinate left-right Rotate
-        if diffBal > 1 and nodeIns.getValue() > node.getLeft().getValue():
+        if diffBal > 1 and value > node.getLeft().getValue():
             node.setLeft(self.rotateLeft(node.getLeft()))
             return self.rotateRight(node)
 
         #Determinate right-left Rotate
-        if diffBal < -1 and nodeIns.getValue() < node.getLeft().getValue():
+        if diffBal < -1 and value < node.getRight().getValue():
             node.setRight(self.rotateRight(node.getRight()))
             return self.rotateLeft(node)
+
         return node
+
     def rotateRight(self, node):
         left = node.getLeft()
         leftR = left.getRight()
@@ -181,13 +195,12 @@ class Tree:
             self.insert(Node(e))
 
 
-
 MAX = 10
 MAX_SIZE = 5
+lst = [(random.randrange(0, MAX)) for i in range(MAX_SIZE)]
 
 
 def testTree(tree):
-    lst = [(random.randrange(0, MAX)) for i in range(MAX_SIZE)]
     print(lst)
     tree.insertList(lst)
     handler = Node(None)
@@ -198,6 +211,7 @@ def testTree(tree):
     print('============POSORDEN============')
     tree.posOrderWalk(tree.getRoot())
     print('============MAX============')
+
     mx = tree.maximum()
     print(mx.getValue() if mx is not None else None)
     print('============MIN============')
@@ -214,9 +228,10 @@ def main():
     #Test Case BST
     print('===================TESTING BST TREE ==============================')
     testTree(bst)
-    #Test Case ALV
+    #Test Case AVL
     print('===================TESTING AVL TREE ==============================')
     avl = Tree(None, True)
     testTree(avl)
-    # Test Case AVL
+    # Test Case AVL​
+
 main()
