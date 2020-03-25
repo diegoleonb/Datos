@@ -1,0 +1,208 @@
+from sys import stdin
+import math
+
+WHITE, GRAY, BLACK = 'W', 'G', 'B'
+
+def getEmptyVertex(vert):
+    return {
+                'value' : vert,
+                'phi' : None,
+                'distance' : math.inf,
+                'color' : WHITE,
+                'final' : None
+            }
+
+
+class GraphAdjacencyList:
+    def __init__(self, V, edges, directed = True ):
+        self.vertex = {}
+        self.edges = {}
+        self.directed = directed
+        "Compose vertex in V as dictionary"""
+        for vert in V :
+            self.vertex[vert] = getEmptyVertex(vert)
+            self.edges[vert] = set()
+        "Compose edges in Edge tuple list on adjacency List"""
+        for edge in edges:
+            if not edge[1] in self.edges[edge[0]]:
+                self.edges[edge[0]].add(edge[1])
+                if not directed:
+                    self.edges[edge[1]].add(edge[0])
+
+    def clearState(self):
+        vertex = self.getVertex()
+        for v in vertex:
+            vertex[v]= getEmptyVertex(v)
+
+    def getVertex(self):
+        return self.vertex
+
+    def getEdges(self):
+        return self.edges
+
+    def getValue(self, v):
+        return str(self.vertex[v]['value'])
+
+    def _getVertexObj(self, key):
+        return self.getVertex()[key]
+
+    def getNeighbors(self, key):
+        return list(map(self._getVertexObj, self.getEdges()[key]))
+
+    def printGraph(self):
+        print()
+        print('GRAPH G(V,E) defined as :', 'Directed' if self.directed else 'Undirected')
+        print('Vertex list ( V ) : ', ', '.join( map( self.getValue, self.getVertex() ) ) )
+        print('Edges ( E ) : ')
+        for key in self.getEdges():
+            print(key,': ', ', '.join(map(str,self.getEdges()[key])))
+        print()
+
+    def printVertex(self):
+        vertex = self.getVertex()
+        for v in vertex:
+            print(vertex[v])
+
+    #Recorridos
+    def BST(self, start):
+        self.clearState()
+        nodeStart = self.getVertex()[start]
+        nodeStart['color'] = GRAY
+        nodeStart['distance'] = 0
+        nodeStart['phi'] = None
+        Q = []
+        Q.append(nodeStart)
+        while len(Q) != 0:
+            u = Q.pop()
+            neighbors = self.getNeighbors(u['value'])
+            for neighbor in neighbors:
+                if neighbor['color'] == WHITE:
+                    neighbor['color'] = GRAY
+                    neighbor['distance'] = u['distance'] + 1
+                    neighbor['phi'] = u['value']
+                    Q.append(neighbor)
+            u['color'] = BLACK
+        return self.getVertex()
+
+    def DFS(self):
+        self.clearState()
+        time = 0
+        vertex = self.getVertex()
+        for v in vertex:
+            u = vertex[v]
+            if u['color'] == WHITE:
+                time = self.DFS_VISIT(u, time)
+
+    def DFS_VISIT(self, u, time):
+        tm = time + 1
+        u['distance'] = tm
+        u['color'] = GRAY
+        for neighbor in self.getNeighbors(u['value']):
+            if neighbor['color'] == WHITE:
+                neighbor['phi'] = u['value']
+                tm = self.DFS_VISIT(neighbor, tm)
+        u['color'] = BLACK
+        tm = tm + 1
+        u['final'] = tm
+        return tm
+
+
+class GraphAdjMatrix:
+
+    def __init__(self, V, edges ):
+        self.vertex = {}
+        self.edges = [[(0) for i in range(max(V)+1)] for j in range(max(V)+1)]
+        "Compose vertex in V as dictionary"""
+        for vert in V :
+            self.vertex[vert] = getEmptyVertex(vert)
+        "Compose edges in Edge tuple list on adjacency matrix"""
+        for edge in edges:
+            self.edges[edge[0]][edge[1]] = 1
+
+    def clearState(self):
+        vertex = self.getVertex()
+        for v in vertex:
+            vertex[v] = getEmptyVertex(v)
+
+    def getVertex(self):
+        return self.vertex
+
+    def getEdges(self):
+        return self.edges
+
+    def getValue(self, v):
+        return str(self.vertex[v]['value'])
+
+    def getNeighbors(self, key):
+        row = self.getEdges()[key]
+        neighbors = []
+        for i in range(len(row)) :
+            if row[i]:
+                neighbors.append(self.getVertex()[i])
+        return neighbors
+
+    def printVertex(self):
+        vertex = self.getVertex()
+        for v in vertex:
+            print(vertex[v])
+
+    def printGraph(self):
+        print()
+        print('GRAPH G(V,E) defined as :')
+        print('Vertex list ( V ) : ', ', '.join( map( self.getValue, self.getVertex() ) ) )
+        print('Edges ( E ) : ')
+        edges = self.getEdges()
+        index = 0
+        print('-','| ', ' '.join( map( str,[ i for i in range( len(edges) ) ] ) ) )
+        print('-', '--', ' '.join(map(str, ['-' for i in range(len(edges))])))
+        for row in edges:
+            print(index,'| ', ' '.join(map(str,row)))
+            index+=1
+        print()
+
+"""TEST Graph
+1 2 3 4 5 6 7 8 9
+8
+1 2
+2 3
+3 6
+3 4
+4 5
+7 8
+8 9
+9 7
+​
+1 2 3 4 5
+5
+1 2
+2 3
+2 4
+3 1
+3 4
+​
+"""
+
+
+def main():
+    vertex = set([ int(i) for i in stdin.readline().strip().split(' ') ])
+    tuplesN = int(stdin.readline().strip())
+    """Read Edges"""
+    edges = []
+    for i in range(tuplesN):
+        pairedEdge = tuple([ int(j) for j in stdin.readline().strip().split(' ') ])
+        edges.append(pairedEdge)
+    """ADJ Matrix implementation"""
+    #graph = GraphAdjMatrix(vertex, edges)
+    #graph.printGraph()
+    """ADJ List implementation"""
+    graph = GraphAdjacencyList(vertex, edges)
+    graph.printGraph()
+    print('=============== BST Result =================')
+    graph.BST(1)
+    graph.printVertex()
+    print('=============== DFS Result =================')
+    graph.DFS()
+    graph.printVertex()
+
+
+main()
